@@ -1,0 +1,12 @@
+{
+  "name": "light/laravel",
+  "autoload": {
+    "psr-4": {
+      "Framework\\": "framework/",
+      "App\\": "app/"
+    },
+    "files": [
+      "framework/helpers.php"
+    ]
+  }
+}
