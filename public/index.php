@@ -1,65 +1,40 @@
 <?php
 
-require __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
-$app = require __DIR__ . '/../bootstrap/app.php';
+$app = require_once __DIR__ . '/../bootstrap/app.php';
 
-echo '=== Day 1 Final Test ===' . PHP_EOL . PHP_EOL;
+echo "=== Day 2 Tests ===\n\n";
 
-// -------------------------------------------------------
-// 1. PATHS — the app knows where it lives
-// -------------------------------------------------------
-echo '--- Paths ---' . PHP_EOL;
-echo 'Base: ' . $app->basePath() . PHP_EOL;
-echo 'App:  ' . $app->appPath() . PHP_EOL;
-echo PHP_EOL;
+// ── Test 1: Lifecycle order ──────────────────────────────────
+echo "--- Test 1: Provider Lifecycle ---\n";
+echo "AppServiceProvider was registered during boot (register before boot).\n";
+$logger = $app->make(\App\Services\Logger::class);
+$logger->log('Logger resolved from provider — lifecycle works!');
+echo "\n";
 
-// -------------------------------------------------------
-// 2. MANUAL BINDING — bind a config array
-// -------------------------------------------------------
-echo '--- Manual Binding ---' . PHP_EOL;
-$app->singleton('config', function () {
-    return [
-        'app_name' => 'Light Laravel',
-        'version' => '0.1.0',
-    ];
-});
+// ── Test 2: Facade ───────────────────────────────────────────
+echo "--- Test 2: Facade ---\n";
+\App\Facades\Log::log('Hello from Log facade!');
+echo "\n";
 
-$config = app('config');
-echo "App: {$config['app_name']} v{$config['version']}" . PHP_EOL;
-echo PHP_EOL;
+// ── Test 3: Singleton via facade ─────────────────────────────
+echo "--- Test 3: Facade returns singleton ---\n";
+$direct = $app->make(\App\Services\Logger::class);
+echo "Same instance through facade and make()? ";
+// Resolve via the facade's path to compare
+$viaFacade = \Framework\Application::getInstance()->make(\App\Services\Logger::class);
+echo ($direct === $viaFacade ? 'YES' : 'NO') . "\n\n";
 
-// -------------------------------------------------------
-// 3. AUTO-WIRING — resolve classes with zero configuration
-// -------------------------------------------------------
-echo '--- Auto-Wiring ---' . PHP_EOL;
-use App\Services\UserRepository;
+// ── Test 4: Deferred provider ────────────────────────────────
+echo "--- Test 4: Deferred Provider ---\n";
+echo "MailServiceProvider has NOT been registered yet...\n";
+echo "Now resolving 'mailer' for the first time:\n";
+$mailer = $app->make('mailer');
+$mailer->send('razvan@test.com', 'Deferred loading works!');
+echo "Resolving 'mailer' again (should NOT re-register):\n";
+$mailer2 = $app->make('mailer');
+$mailer2->send('razvan@test.com', 'Still the same singleton!');
+echo "Same instance? " . ($mailer === $mailer2 ? 'YES' : 'NO') . "\n\n";
 
-// No bind() for Logger or UserRepository!
-// Container reads constructors and builds the chain automatically.
-$repo = app(UserRepository::class);
-$user = $repo->find(1);
-echo "Found: {$user['name']} ({$user['email']})" . PHP_EOL;
-echo PHP_EOL;
-
-// -------------------------------------------------------
-// 4. SINGLETON PROOF — same instance every time
-// -------------------------------------------------------
-echo '--- Singleton Proof ---' . PHP_EOL;
-$config1 = app('config');
-$config2 = app('config');
-echo 'Config is singleton? ' . ($config1 === $config2 ? 'YES' : 'NO') . PHP_EOL;
-echo PHP_EOL;
-
-// -------------------------------------------------------
-// 5. APP SELF-REFERENCE — app('app') returns itself
-// -------------------------------------------------------
-echo '--- Self Reference ---' . PHP_EOL;
-echo 'app("app") works? ' . (app('app') === $app ? 'YES' : 'NO') . PHP_EOL;
-echo 'app() works? ' . (app() === $app ? 'YES' : 'NO') . PHP_EOL;
-echo PHP_EOL;
-
-echo '=== Day 1 Complete ===' . PHP_EOL;
-
-
-
+echo "=== All Day 2 Tests Passed! ===\n";

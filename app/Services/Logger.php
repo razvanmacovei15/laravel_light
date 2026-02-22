@@ -4,7 +4,7 @@ namespace App\Services;
 
 class Logger
 {
-    public function info(string $message): void
+    public function log(string $message): void
     {
         echo "[INFO] {$message}" . PHP_EOL;
     }

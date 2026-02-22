@@ -8,13 +8,13 @@ class UserRepository
 
     public function find(int $id): array
     {
-        $this->logger->info("Finding user #{$id}");
+        $this->logger->log("Finding user #{$id}");
         return ['id' => $id, 'name' => 'Razvan', 'email' => 'razvan@example.com'];
     }
 
     public function all(): array
     {
-        $this->logger->info("Fetching all users");
+        $this->logger->log("Fetching all users");
         return [
             ['id' => 1, 'name' => 'Razvan'],
             ['id' => 2, 'name' => 'Alex'],
